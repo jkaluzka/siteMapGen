@@ -29,7 +29,7 @@ class CSVWriterTest(unittest.TestCase):
 
     def test_save(self):
         writer = self.writer(self.outfile_path)
-        writer.save(self.outfile_path, ['abc', 'def', 'ghi'])
+        writer.save(['abc', 'def', 'ghi'])
         expected = 'url\nabc\ndef\nghi\n'
         with open(self.outfile_path, 'rb') as result:
             self.assertEqual(result.read(), expected)
@@ -44,9 +44,10 @@ class XMLWriterTest(unittest.TestCase):
     def tearDown(self):
         os.remove(self.outfile_path)
 
-    def test_not_supported_ext(self):
+    def test_unknown_ext(self):
         writer = self.writer('test.xxml')
-        self.assertFalse(writer.check())
+        self.assertTrue(writer.check())
+        self.assertEqual(writer.file_name, 'test.xxml.xml')
 
     def test_supported_ext(self):
         writer = self.writer('test.xml')
@@ -54,7 +55,7 @@ class XMLWriterTest(unittest.TestCase):
 
     def test_save(self):
         writer = self.writer(self.outfile_path)
-        writer.save(self.outfile_path, ['1', '2', '3'])
+        writer.save(['1', '2', '3'])
         expected = '' \
            '<?xml version="1.0" encoding="UTF-8"?>\n' \
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' \
@@ -79,7 +80,6 @@ class WriterManagerTest(unittest.TestCase):
     def test_select_xml_writer_by_default(self):
         manager = WriterManager('test.csvvv')
         self.assertTrue(isinstance(manager.writer, XMLWriter))
-        self.assertTrue(manager.file_name, 'test.csvvv.xml')
 
     @mock.patch.object(CSVWriter, 'save')
     def test_skip_writing_when_no_data(self, save):
@@ -88,25 +88,25 @@ class WriterManagerTest(unittest.TestCase):
         self.assertFalse(save.called)
 
     @mock.patch.object(CSVWriter, 'save')
-    def test_skip_writing_with_list(self, save):
+    def test_writing_with_list(self, save):
         manager = WriterManager('test.csv')
         manager.export_data([1, 2, 3])
         self.assertTrue(save.called)
-        self.assertItemsEqual(save.call_args_list[0][0][1], [1, 2, 3])
+        self.assertItemsEqual(save.call_args_list[0][0][0], [1, 2, 3])
 
     @mock.patch.object(CSVWriter, 'save')
-    def test_skip_writing_with_tuple(self, save):
+    def test_writing_with_tuple(self, save):
         manager = WriterManager('test.csv')
         manager.export_data((1, 2, 3))
         self.assertTrue(save.called)
-        self.assertItemsEqual(save.call_args_list[0][0][1], [1, 2, 3])
+        self.assertItemsEqual(save.call_args_list[0][0][0], [1, 2, 3])
 
     @mock.patch.object(CSVWriter, 'save')
-    def test_skip_writing_with_set(self, save):
+    def test_writing_with_set(self, save):
         manager = WriterManager('test.csv')
         manager.export_data({1, 2, 3})
         self.assertTrue(save.called)
-        self.assertItemsEqual(save.call_args_list[0][0][1], [1, 2, 3])
+        self.assertItemsEqual(save.call_args_list[0][0][0], [1, 2, 3])
 
     @mock.patch.object(CSVWriter, 'save')
     def test_skip_writing_with_string(self, save):

@@ -31,12 +31,11 @@ class Writer:
         """
         raise NotImplementedError
 
-    def save(self, file_name, data):
+    def save(self, data):
         """
         Method for saving data into file.
         Each class that inherits must implement body of this method.
 
-        :param file_name: str - name of the output file
         :param data: str[] - list of strings
         """
         raise NotImplementedError
@@ -56,14 +55,13 @@ class CSVWriter(Writer):
         """
         return self.file_name.endswith('.csv')
 
-    def save(self, file_name, data):
+    def save(self, data):
         """
         Method save data into `csv` file.
 
-        :param file_name: str - name of the output file
         :param data: str[] - list of strings
         """
-        with open(file_name, 'wb') as csv_file:
+        with open(self.file_name, 'wb') as csv_file:
             csv_file.writelines('url\n')
             for row in data:
                 csv_file.writelines(row + '\n')
@@ -81,18 +79,20 @@ class XMLWriter(Writer):
         :file_name: str - name of the file
         :return: bool - can handle extension or not
         """
-        return self.file_name.endswith('.xml')
+        if not self.file_name.endswith('.xml'):
+            _logger.info('Unknown extension, `xml` will be used.')
+            self.file_name += '.xml'
+        return True
 
-    def save(self, file_name, data):
+    def save(self, data):
         """
         Method save data in `xml` format.
 
-        :param file_name: str - name of the output file
         :param data: str[] - list of strings
         """
         header = '<?xml version="1.0" encoding="UTF-8"?>\n' \
                  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-        with open(file_name, 'wt') as xml_file:
+        with open(self.file_name, 'wt') as xml_file:
             xml_file.write(header)
             for row in data:
                 xml_file.write('\n  <url>\n    <loc>%s</loc>\n  </url>' % (
@@ -107,13 +107,14 @@ class WriterManager:
     """
 
     def __init__(self, file_name):
-        self.file_name = file_name
-        self.writer = CSVWriter(file_name)
-        if not self.writer.check():
-            self.writer = XMLWriter(file_name)
-            if not self.writer.check():
-                _logger.info('Unknown extension, `xml` will be used.')
-                self.file_name += '.xml'
+        for writer_class in (CSVWriter, XMLWriter):
+            writer = writer_class(file_name)
+            if writer.check():
+                self.writer = writer
+                break
+
+        if not self.writer:
+            raise ValueError('No writer was found!! - see check methods!')
 
     def export_data(self, data):
         """
@@ -130,4 +131,4 @@ class WriterManager:
             raise AttributeError('Wrong type was passed as `data`: {}'.format(
                 type(data)
             ))
-        self.writer.save(self.file_name, data)
+        self.writer.save(data)
