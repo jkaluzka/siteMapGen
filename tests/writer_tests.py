@@ -29,8 +29,8 @@ class CSVWriterTest(unittest.TestCase):
 
     def test_save(self):
         writer = self.writer(self.outfile_path)
-        writer.save(self.outfile_path, ['1', '2', '3'])
-        expected = 'url\n1\n2\n3\n'
+        writer.save(self.outfile_path, ['abc', 'def', 'ghi'])
+        expected = 'url\nabc\ndef\nghi\n'
         with open(self.outfile_path, 'rb') as result:
             self.assertEqual(result.read(), expected)
 
@@ -98,6 +98,13 @@ class WriterManagerTest(unittest.TestCase):
     def test_skip_writing_with_tuple(self, save):
         manager = WriterManager('test.csv')
         manager.export_data((1, 2, 3))
+        self.assertTrue(save.called)
+        self.assertItemsEqual(save.call_args_list[0][0][1], [1, 2, 3])
+
+    @mock.patch.object(CSVWriter, 'save')
+    def test_skip_writing_with_set(self, save):
+        manager = WriterManager('test.csv')
+        manager.export_data({1, 2, 3})
         self.assertTrue(save.called)
         self.assertItemsEqual(save.call_args_list[0][0][1], [1, 2, 3])
 

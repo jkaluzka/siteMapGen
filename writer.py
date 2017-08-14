@@ -1,8 +1,6 @@
 """
 Script contains writer class
 """
-import collections
-import csv
 import xml.sax.saxutils
 
 import logging
@@ -66,14 +64,9 @@ class CSVWriter(Writer):
         :param data: str[] - list of strings
         """
         with open(file_name, 'wb') as csv_file:
-            file_writer = csv.writer(
-                csv_file,
-                delimiter=',',
-                lineterminator='\n',
-            )
-            file_writer.writerow(['url'])
+            csv_file.writelines('url\n')
             for row in data:
-                file_writer.writerow(row)
+                csv_file.writelines(row + '\n')
 
 
 class XMLWriter(Writer):
@@ -99,12 +92,12 @@ class XMLWriter(Writer):
         """
         header = '<?xml version="1.0" encoding="UTF-8"?>\n' \
                  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-        with open(file_name, 'wt') as fh:
-            fh.write(header)
+        with open(file_name, 'wt') as xml_file:
+            xml_file.write(header)
             for row in data:
-                fh.write('\n  <url>\n    <loc>%s</loc>\n  </url>' % (
+                xml_file.write('\n  <url>\n    <loc>%s</loc>\n  </url>' % (
                     xml.sax.saxutils.escape(row)))
-            fh.write('\n</urlset>')
+            xml_file.write('\n</urlset>')
 
 
 class WriterManager:
@@ -119,6 +112,7 @@ class WriterManager:
         if not self.writer.check():
             self.writer = XMLWriter(file_name)
             if not self.writer.check():
+                _logger.info('Unknown extension, `xml` will be used.')
                 self.file_name += '.xml'
 
     def export_data(self, data):
@@ -132,6 +126,8 @@ class WriterManager:
             _logger.warning('Empty data was passed to save function! Pass')
             return
 
-        if not isinstance(data, collections.Sequence) or isinstance(data, str):
-            raise AttributeError('Wrong type was passed as `data`')
+        if not isinstance(data, (list, tuple, set)):
+            raise AttributeError('Wrong type was passed as `data`: {}'.format(
+                type(data)
+            ))
         self.writer.save(self.file_name, data)
