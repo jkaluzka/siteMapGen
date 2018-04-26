@@ -22,7 +22,5 @@ python run.py -h
 ## running tests
 
 ```
-PYTHONPATH=`pwd` python tests/crawler_tests.py
-PYTHONPATH=`pwd` python tests/writer_tests.py
-PYTHONPATH=`pwd` python tests/run_tests.py
+pytest tests
 ```

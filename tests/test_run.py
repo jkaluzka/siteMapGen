@@ -1,22 +1,18 @@
-"""
-In this file tests for `run` scripts are gathered.
-"""
+"""In this file tests for `run` scripts are gathered."""
 import subprocess
-import unittest
 
 
-class RunTest(unittest.TestCase):
+class TestRun:
+    """Run class unit tests."""
 
     def test_running_without_url(self):
+        """Test running script without passing url."""
         args = ["python", "run.py"]
         sb = subprocess.call(args)
-        self.assertEqual(sb, 1)
+        assert sb == 1
 
     def test_running_with_url(self):
+        """Test running script with url."""
         args = ["python", "run.py", "www.test.com"]
         sb = subprocess.call(args)
-        self.assertEqual(sb, 0)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        assert sb == 0

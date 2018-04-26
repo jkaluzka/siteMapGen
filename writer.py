@@ -61,7 +61,7 @@ class CSVWriter(Writer):
 
         :param data: str[] - list of strings
         """
-        with open(self.file_name, 'wb') as csv_file:
+        with open(self.file_name, 'w') as csv_file:
             csv_file.writelines('url\n')
             for row in data:
                 csv_file.writelines(row + '\n')

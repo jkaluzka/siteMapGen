@@ -1,10 +1,8 @@
-"""
-Script contains crawler class
-"""
-import urlparse
+"""Script contains crawler class."""
 import requests
 import logging
 
+from urllib import parse
 from bs4 import BeautifulSoup
 
 logging.basicConfig()
@@ -27,7 +25,7 @@ class Crawler:
         if not base_url.startswith('http'):
             base_url = 'http://{}'.format(base_url)
         self.base_url = base_url
-        self.server = urlparse.urlsplit(base_url)[1]
+        self.server = parse.urlsplit(base_url)[1]
         self.limit = limit
 
         self.pages = {base_url, }
@@ -41,8 +39,8 @@ class Crawler:
         :param url: str - url to check
         :return: str - url with prepended `base_url`
         """
-        _url, _ = urlparse.urldefrag(url)
-        return urlparse.urljoin(self.base_url, _url)
+        _url, _ = parse.urldefrag(url)
+        return parse.urljoin(self.base_url, _url)
 
     def analyze(self):
         """
@@ -79,7 +77,7 @@ class Crawler:
 
                 is_internal = (
                     value.startswith('/') or
-                    urlparse.urlsplit(value).netloc == self.server
+                    parse.urlsplit(value).netloc == self.server
                     and 'mailto:' not in value
                 )
                 if is_internal:
