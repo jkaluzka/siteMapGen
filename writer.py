@@ -1,9 +1,8 @@
 """
 Script contains writer class
 """
-import xml.sax.saxutils
-
 import logging
+import xml.sax.saxutils
 
 logging.basicConfig()
 _logger = logging.getLogger(__name__)
@@ -27,7 +26,7 @@ class Writer:
         Each class that inherits must implement body of this method.
 
         :file_name: str - name of the file
-        :return: bool - can handle extension or not 
+        :return: bool - can handle extension or not
         """
         raise NotImplementedError
 

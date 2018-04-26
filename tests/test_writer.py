@@ -4,7 +4,7 @@ import tempfile
 
 import pytest
 
-from writer import XMLWriter, CSVWriter, WriterManager
+from writer import CSVWriter, WriterManager, XMLWriter
 
 
 class WriterMixin:
@@ -22,6 +22,8 @@ class WriterMixin:
 
 
 class TestCSVWriter(WriterMixin):
+    """Tests class for CSV Writer."""
+
     writer = CSVWriter
 
     @pytest.mark.parametrize('file_name,expected', [
@@ -29,10 +31,12 @@ class TestCSVWriter(WriterMixin):
         ('test.csv', True),
     ])
     def test_supporting_ext(self, file_name, expected):
+        """Test that only `csv` extension is supported by this writer."""
         writer = self.writer(file_name)
         assert writer.check() == expected
 
     def test_save(self):
+        """Test saving data to file."""
         writer = self.writer(self.outfile_path)
         writer.save(['abc', 'def', 'ghi'])
         expected = 'url\nabc\ndef\nghi\n'
@@ -41,6 +45,8 @@ class TestCSVWriter(WriterMixin):
 
 
 class TestXMLWriter(WriterMixin):
+    """Tests class for CSV Writer."""
+
     writer = XMLWriter
 
     @pytest.mark.parametrize('file_name,new_name', [
@@ -48,11 +54,13 @@ class TestXMLWriter(WriterMixin):
         ('test.xml', 'test.xml'),
     ])
     def test_supporting_extension(self, file_name, new_name):
+        """Test that only `xml` extension is supported by this writer."""
         writer = self.writer(file_name)
         assert writer.check()
         assert writer.file_name == new_name
 
     def test_save(self):
+        """Test saving data to file."""
         writer = self.writer(self.outfile_path)
         writer.save(['1', '2', '3'])
         expected = '' \
@@ -68,20 +76,20 @@ class TestXMLWriter(WriterMixin):
 
 @pytest.mark.usefixtures('mocker')
 class TestWriterManager:
+    """Tests class for Writer Manager."""
 
-    def test_select_csv_writer(self):
-        manager = WriterManager('test.csv')
-        assert isinstance(manager.writer, CSVWriter)
-
-    def test_select_xml_writer(self):
-        manager = WriterManager('test.xml')
-        assert isinstance(manager.writer, XMLWriter)
-
-    def test_select_xml_writer_by_default(self):
-        manager = WriterManager('test.csvvv')
-        assert isinstance(manager.writer, XMLWriter)
+    @pytest.mark.parametrize('file_name,expected_class', [
+        ('test.csv', CSVWriter),
+        ('test.xml', XMLWriter),
+        ('test.csvvv', XMLWriter),
+    ])
+    def test_select_csv_writer(self, file_name, expected_class):
+        """Test selecting writer according to file extension."""
+        manager = WriterManager(file_name)
+        assert isinstance(manager.writer, expected_class)
 
     def test_skip_writing_when_no_data(self, mocker):
+        """Test writing to file is skipped when there is no data to save."""
         save_mck = mocker.patch('writer.CSVWriter.save')
         manager = WriterManager('test.csv')
         manager.export_data([])
@@ -93,6 +101,7 @@ class TestWriterManager:
         {1, 2, 3},  # set
     ])
     def test_writing_with_data(self, mocker, data):
+        """Test writing to file with different types of data."""
         save_mck = mocker.patch('writer.CSVWriter.save')
         manager = WriterManager('test.csv')
         manager.export_data(data)
@@ -100,6 +109,7 @@ class TestWriterManager:
         assert save_mck.call_args_list[0][0][0] == data
 
     def test_skip_writing_with_string(self, mocker):
+        """Test raising error when data format are not supported."""
         save_mck = mocker.patch('writer.CSVWriter.save')
         manager = WriterManager('test.csv')
         with pytest.raises(AttributeError):

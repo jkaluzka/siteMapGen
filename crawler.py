@@ -1,9 +1,9 @@
 """Script contains crawler class."""
-import requests
 import logging
+import requests
 
-from urllib import parse
 from bs4 import BeautifulSoup
+from urllib import parse
 
 logging.basicConfig()
 _logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class Crawler:
         """
         Helper method for removing any existing fragment
         of URL. Finally prepend `url` with `base_url`
-        
+
         :param url: str - url to check
         :return: str - url with prepended `base_url`
         """
@@ -56,8 +56,7 @@ class Crawler:
             resp = requests.get(page)
 
             if resp.status_code >= 400:
-                _logger.debug('page {} not accessible with error: {}'.format(
-                    page, resp.status_code))
+                _logger.debug('page %s not accessible with error: %s', page, resp.status_code)
                 continue
 
             if 'text/html' not in resp.headers.get('Content-Type'):
@@ -83,6 +82,3 @@ class Crawler:
                 if is_internal:
                     # only internal links should be analyzed later
                     self.pages.add(self._join_url(value))
-
-
-

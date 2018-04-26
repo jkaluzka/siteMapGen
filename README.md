@@ -3,6 +3,11 @@
 *site map generator* - crawls over page and gathers links to internal pages.
 
 
+## requirements
+
+Since this app uses ``asyncio`` python 3.5 or higher is required.
+
+
 ## installing
 
 ```
@@ -23,4 +28,11 @@ python run.py -h
 
 ```
 pytest tests
+```
+
+
+## running linter
+
+```
+pylint ./*
 ```
